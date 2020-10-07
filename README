@@ -1,3 +1,27 @@
+# vlc-srt-urlparam-mod
+A modified version of VLC 3.0.x which adds support for SRT query parameters.
+
+## Supported Parameters
+
+- `streamid`
+
+## Notice
+This is uncompiled source code! Meaning you will have to compile VLC yourself in order to be able to use this modification.
+
+## Using this yourself (Ubuntu)
+This is not a perfect step-by-step guide, only the basic information required to get it working. I built and use this on Linux, your results may vary.
+
+- Clone this repository: `git clone https://github.com/IRLToolkit/vlc-srt-urlparam-mod.git`
+- You must remove any existing version of vlc and libvlc via apt and/or snap.
+- Uncomment the `deb-src` line for `universe` in your `/etc/apt/sources.list`, then run `sudo apt update`
+- Install all necessary VLC dependencies with `sudo apt build-dep vlc`
+- CD into the cloned repository and run `./configure`, then assuming it works run `./compile`. Compiling will take a long time.
+- To install it onto your system, run `sudo make install`, and then `sudo ldconfig`.
+
+And you should be done! Here's an example SRT URL containing a `streamid` parameter: `srt://123.123.123.123:6969?streamid=app/streamname`
+
+## ORIGINAL VLC README BELOW
+
 README for the VLC media player
 ===============================
 

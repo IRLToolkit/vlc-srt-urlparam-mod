@@ -64,6 +64,7 @@ struct stream_sys_t
     bool        b_interrupted;
     char       *psz_host;
     int         i_port;
+    char       *psz_option;
 };
 
 static void srt_wait_interrupted(void *p_data)
@@ -176,6 +177,30 @@ static bool srt_schedule_reconnect(stream_t *p_stream)
             psz_passphrase, strlen( psz_passphrase ) );
         srt_setsockopt( p_sys->sock, 0, SRTO_PBKEYLEN,
             &i_key_length, sizeof( int ) );
+    }
+    
+    
+    msg_Info( p_stream, "Raw params: %s", p_sys->psz_option );
+    char *all_parameters = strdup( p_sys->psz_option );
+    char *save_ptr1, *save_ptr2;
+    char *parameter = strtok_r(all_parameters, "&", &save_ptr1);
+    char *key, *value;
+    while( parameter != NULL ) {
+        msg_Info( p_stream, "URL Parameter: %s", parameter );
+        key = strtok_r(parameter, "=", &save_ptr2);
+        value = strtok_r(NULL, "=", &save_ptr2);
+        if (value == NULL) {
+            msg_Warn( p_stream, "URL Parameter Key %s is missing a value!", key );
+        } else if (strcmp(key, "streamid") == 0) {
+            if (strcmp(value, "") != 0) {
+                srt_setsockopt (p_sys->sock, 0, SRTO_STREAMID, value, strlen( value ) );
+            } else {
+                msg_Warn( p_stream, "Empty `streamid` parameter! Ignoring." );
+            }
+        } else {
+            msg_Warn( p_stream, "Unknown URL Parameter: %s", key );
+        }
+        parameter = strtok_r(NULL, "&", &save_ptr1);
     }
 
     srt_epoll_add_usock( p_sys->i_poll_id, p_sys->sock,
@@ -320,6 +345,7 @@ static int Open(vlc_object_t *p_this)
 
     p_sys->psz_host = strdup( parsed_url.psz_host );
     p_sys->i_port = parsed_url.i_port;
+    p_sys->psz_option = strdup( parsed_url.psz_option );
 
     vlc_UrlClean( &parsed_url );
 
@@ -351,6 +377,7 @@ failed:
         if ( p_sys->i_poll_id != -1 ) srt_epoll_release( p_sys->i_poll_id );
 
         free( p_sys->psz_host );
+        free( p_sys->psz_option );
 
         vlc_obj_free( p_this, p_sys );
         p_stream->p_sys = NULL;
@@ -373,6 +400,7 @@ static void Close(vlc_object_t *p_this)
         srt_epoll_release( p_sys->i_poll_id );
 
         free( p_sys->psz_host );
+        free( p_sys->psz_option );
 
         vlc_obj_free( p_this, p_sys );
         p_stream->p_sys = NULL;
