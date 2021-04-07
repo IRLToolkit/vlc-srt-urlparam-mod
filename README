@@ -1,4 +1,7 @@
 =============== vlc-srt-urlparam-mod ===============
+
+ARCHIVE NOTE: VLC has recently added support for srt url query parameters, so this repo has served its purpose.
+
 A modified version of VLC 3.0.x which adds support for SRT query parameters.
 
 ========== Supported Parameters ==========
